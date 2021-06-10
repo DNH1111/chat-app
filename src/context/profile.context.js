@@ -58,7 +58,7 @@ export const ProfileProvider = ({ children }) => {
                 */
                 userRef = database.ref(`/profiles/${user.uid}`);
                 userRef.on('value', snap => {
-                    const [name, createdAt] = snap.val();
+                    const { name, createdAt } = snap.val();
 
                     const userData = {
                         name,
@@ -82,6 +82,7 @@ export const ProfileProvider = ({ children }) => {
             }
         });
 
+        // cleanup function
         return () => {
             authUnsub(); // unsubscribing the auth when the Component is unmounted
 
@@ -92,15 +93,13 @@ export const ProfileProvider = ({ children }) => {
         };
     }, []);
 
-    // Context data can be passed using "value = {ContextData}"" inside the Provider tag
+    // Context data can be passed using "value = {ContextData}" inside the Provider tag
     return (
-        <ProfileContext.Provider value={{ profile, isLoading }}>
+        <ProfileContext.Provider value={{ isLoading, profile }}>
             {children}
         </ProfileContext.Provider>
     );
 };
 
-// custom-hook to use the useContext() hook for the ProfileContext
-export const useProfile = () => {
-    useContext(ProfileContext);
-};
+// custom-hook to use the useContext() hook for the ProfileContext Context
+export const useProfile = () => useContext(ProfileContext);
