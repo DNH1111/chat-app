@@ -13,7 +13,10 @@ const Dashboard = ({ onSignOut }) => {
     */
     const { profile } = useProfile();
 
-    const onSave = newData => {};
+    const onSave = async newData => {
+        // newData is the new input received from the user that would replace its old value in the database
+        // since this function requires working with the database, it would return a promise, so it's an async function
+    };
 
     return (
         <>
