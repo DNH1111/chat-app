@@ -2,6 +2,7 @@
 import React from 'react';
 import { Grid, Row, Col } from 'rsuite';
 import Sidebar from '../components/Sidebar';
+import '../styles/utility.scss';
 
 const Homepage = () => {
     return (

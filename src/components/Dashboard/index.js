@@ -1,8 +1,8 @@
-// React Component to containing code for Dashboard Component
+// React Component to contain code for Dashboard Component
 import React from 'react';
 
 const Dashboard = () => {
-    return <div>Dashboard</div>;
+    return <div>hello</div>;
 };
 
 export default Dashboard;
