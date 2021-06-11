@@ -44,6 +44,7 @@ const EditableInput = ({
             await onSave(trimmedInput);
         }
 
+        // disable "edit" function after initial value updated
         setIsEditable(false);
     };
 
