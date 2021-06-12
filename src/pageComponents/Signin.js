@@ -70,7 +70,7 @@ const Signin = () => {
 
                                 <Button
                                     block
-                                    color="red"
+                                    color="green"
                                     onClick={onGoogleSignIn}
                                 >
                                     <Icon icon="google" /> Continue with Google
