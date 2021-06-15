@@ -1,6 +1,6 @@
 // React Context for Chat Rooms
 // Chat rooms would be accessed from the Sidebar and Homepage Component
-import React, { createContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { database } from '../misc/firebase';
 import { transformToArrayWithId } from '../misc/helpers';
 
@@ -30,6 +30,9 @@ export const RoomsProvider = ({ children }) => {
     }, [rooms]);
 
     return (
-        <RoomsContext.Provider value="hello">{children}</RoomsContext.Provider>
+        <RoomsContext.Provider value={rooms}>{children}</RoomsContext.Provider>
     );
 };
+
+// custom-hook to return Rooms Context data
+export const useRooms = () => useContext(RoomsContext);

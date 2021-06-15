@@ -1,9 +1,16 @@
 //
 import React from 'react';
-import { Nav } from 'rsuite';
+import { Loader, Nav } from 'rsuite';
+import { Link, useLocation } from 'react-router-dom';
+import { useRooms } from '../../context/rooms.context';
 import RoomItem from './RoomItem';
 
 const ChatRoomList = ({ aboveElementHeight }) => {
+    // using custom-hook to get access to Rooms Context
+    const roomsData = useRooms();
+
+    const location = useLocation();
+
     return (
         <Nav
             appearance="subtle"
@@ -17,10 +24,29 @@ const ChatRoomList = ({ aboveElementHeight }) => {
               (div containing DashboardToggle and CreateRoomBtnModal) from 100%
 
             */
+            activeKey={location.pathname}
         >
-            <Nav.Item>
-                <RoomItem />
-            </Nav.Item>
+            {!roomsData && (
+                <Loader
+                    center
+                    vertical
+                    content="Loading..."
+                    speed="slow"
+                    size="md"
+                />
+            )}
+            {roomsData &&
+                roomsData.length > 0 &&
+                roomsData.map(room => (
+                    <Nav.Item
+                        componentClass={Link}
+                        to={`/chat/${room.id}`}
+                        key={room.id}
+                        eventKey={`/chat/${room.id}`}
+                    >
+                        <RoomItem room={room} />
+                    </Nav.Item>
+                ))}
         </Nav>
     );
 };
