@@ -4,12 +4,12 @@
    Also, it's done using 'use-context-selector'.
    This also allows us to get a specific value instead of a whole set of values.
 
-   Eg.: Consider this Context provides this data:
+   Eg.: Suppose this Context provides this data:
          CurrentRoom = {
              name,
              description
          }
-        if we only need "name" from an Object, we could get retrieve it without
+        if we only need "name" from the CurrentRoom Context, we could get retrieve it without
         having to retrieve the whole Object in the first place. 
         
         Also, if the state of "description" changes, the Component using only 
