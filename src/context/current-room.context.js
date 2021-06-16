@@ -15,6 +15,9 @@
         Also, if the state of "description" changes, the Component using only 
         "name" from this Context won't be re-rendered, which would have been the case
         if 'use-context-selector' was not used.
+
+        The Component accessing Contexts implemented using 'use-context-selector'
+        have to be "memo'd". 
 */
 import React from 'react';
 import { createContext, useContextSelector } from 'use-context-selector';

@@ -1,5 +1,5 @@
 // React Component for Button that opens a Modal on clicking and shows Chat Room info
-import React from 'react';
+import React, { memo } from 'react';
 import { Button, Modal } from 'rsuite';
 
 import {
@@ -40,4 +40,4 @@ const RoomInfoBtnModal = () => {
     );
 };
 
-export default RoomInfoBtnModal;
+export default memo(RoomInfoBtnModal);
