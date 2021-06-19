@@ -22,7 +22,11 @@ export function transformToArrayWithId(snapVal) {
     /* if snapVal is not null, return an array of objects where each object consists of a key and its values 
         from snapVal
         eg: suppose snapVal = {
-                        roomId: {
+                        room_1_id: {
+                            name,
+                            description
+                        },
+                        room_2_id: {
                             name,
                             description
                         }
@@ -31,7 +35,12 @@ export function transformToArrayWithId(snapVal) {
                                         {
                                             name,
                                             description,
-                                            roomId
+                                            room_1_id
+                                        },
+                                         {
+                                            name,
+                                            description,
+                                            room_2_id
                                         }
                                     ]
            
