@@ -6,6 +6,7 @@ import { useProfile } from '../../context/profile.context';
 import { useModalState } from '../../misc/custom-hooks';
 import { database, storage } from '../../misc/firebase';
 import ProfileAvatar from './ProfileAvatar';
+import { getUserUpdates } from '../../misc/helpers';
 
 const fileInputTypes = '.png, .jpeg, .jpg';
 const acceptedFileTypes = ['image/png', 'image/jpeg', 'image/pjpeg'];
@@ -87,11 +88,30 @@ const AvatarUploadBtn = () => {
             // get the download URL of the Avatar image, and save it in the database
             // REMINDER: the original BLOB image is stored in the firebase storage as done above.
             const downloadURL = await uploadAvatarResult.ref.getDownloadURL();
-            // saving it in the user database
-            const userAvatarRef = database
-                .ref(`profiles/${profile.uid}`)
-                .child('avatar');
-            userAvatarRef.set(downloadURL);
+
+            // using user-defined function to get updated values
+            /* returns on object. Keys correspond to location in the databases, and their
+                respective values correspond to new values that are to replace the older
+                ones in the database.
+            */
+            const updates = await getUserUpdates(
+                profile.uid,
+                'avatar',
+                downloadURL,
+                database
+            );
+
+            /* structure of *updates*:
+                - 'updates' returned by the getUserUpdates() function is an object.
+                - each key corresponds to the location where the update is to be made, and
+                  each value corresponds to the updated value that is to replace the old value.
+                - Eg: updates : {
+                    '/messages/author/name' : 'newName'
+                    'rooms/lastMessage/text' : 'newMessage'
+                    }
+            */
+            // updating values in the databases
+            await database.ref().update(updates);
 
             setIsLoading(false);
             Alert.info('Avatar uploaded', 4000);
