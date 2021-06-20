@@ -1,5 +1,17 @@
+/* eslint-disable prefer-const */
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import firebase from 'firebase/app';
 import { auth, database } from '../misc/firebase';
+
+export const isOfflineForDatabase = {
+    state: 'offline',
+    last_changed: firebase.database.ServerValue.TIMESTAMP,
+};
+
+const isOnlineForDatabase = {
+    state: 'online',
+    last_changed: firebase.database.ServerValue.TIMESTAMP,
+};
 
 // creating Context object
 const ProfileContext = createContext();
@@ -37,6 +49,7 @@ export const ProfileProvider = ({ children }) => {
     // calling useEffect() to alter the state of "profile" on every Component mount
     useEffect(() => {
         let userRef;
+        let userStatusRef;
 
         const authUnsub = auth.onAuthStateChanged(user => {
             // if a usern has signed-in, user would have info of the user
@@ -57,6 +70,11 @@ export const ProfileProvider = ({ children }) => {
                    "snap.val()" returns a JSON value of the contents of the database that were changed.
                 */
                 userRef = database.ref(`/profiles/${user.uid}`);
+
+                // Create a reference to this user's specific status node.
+                // This is where we will store data about being online/offline.
+                userStatusRef = database.ref(`/status/${auth.uid}`);
+
                 userRef.on('value', snap => {
                     const { name, createdAt, avatar } = snap.val();
 
@@ -71,11 +89,45 @@ export const ProfileProvider = ({ children }) => {
                     setProfile(userData);
                     setIsLoading(false);
                 });
+
+                // Create a reference to the special '.info/connected' path in
+                // Realtime Database. This path returns `true` when connected
+                // and `false` when disconnected.
+                database.ref('.info/connected').on('value', snapshot => {
+                    // If we're not currently connected, don't do anything.
+                    if (snapshot.val() === false) {
+                        return;
+                    }
+
+                    // If we are currently connected, then use the 'onDisconnect()'
+                    // method to add a set which will only trigger once this
+                    // client has disconnected by closing the app,
+                    // losing internet, or any other means.
+                    userStatusRef
+                        .onDisconnect()
+                        .set(isOfflineForDatabase)
+                        .then(() => {
+                            // The promise returned from .onDisconnect().set() will
+                            // resolve as soon as the server acknowledges the onDisconnect()
+                            // request, NOT once we've actually disconnected:
+                            // https://firebase.google.com/docs/reference/js/firebase.database.OnDisconnect
+
+                            // We can now safely set ourselves as 'online' knowing that the
+                            // server will mark us as offline once we lose connection.
+                            userStatusRef.set(isOnlineForDatabase);
+                        });
+                });
             } else {
                 // if the user has signed-out, or is not signed-in, unsubscribe the user reference...
                 if (userRef) {
                     userRef.off();
                 }
+
+                if (userStatusRef) {
+                    userStatusRef.off();
+                }
+
+                database.ref('.info/connected').off();
 
                 // ...and set profile to null and isLoading to false
                 setProfile(null);
@@ -91,6 +143,12 @@ export const ProfileProvider = ({ children }) => {
                 // unusbscribing user reference
                 userRef.off();
             }
+
+            if (userStatusRef) {
+                userStatusRef.off();
+            }
+
+            database.ref('.info/connected').off();
         };
     }, []);
 
