@@ -12,6 +12,8 @@ const Top = () => {
     // CurrentRoom Context is implemented using use-context-selector
     const name = useCurrentRoom(v => v.name);
 
+    const isAdmin = useCurrentRoom(v => v.isAdmin);
+
     const isMobile = useMediaQuery('(max-width: 992px)');
 
     return (
@@ -33,7 +35,7 @@ const Top = () => {
                 </h4>
 
                 <ButtonToolbar className="ws-no-wrap">
-                    <EditRoomBtnDrawer />
+                    {isAdmin && <EditRoomBtnDrawer />}
                 </ButtonToolbar>
             </div>
 

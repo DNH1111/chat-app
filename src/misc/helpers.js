@@ -13,7 +13,12 @@ export function getNameInitials(name) {
     return splitName[0][0];
 }
 
-// function to convert database snapshot values from JSON to array
+// function to transform an Object to Array
+export function transformToArr(snapVal) {
+    return snapVal ? Object.keys(snapVal) : [];
+}
+
+// function to convert database snapshot values from JSON to Array
 export function transformToArrayWithId(snapVal) {
     /* snapVal refers to the contents of snap.val() used inside the callback function inside the on() function,
         while retrieving the contents of the database. It has the contents of the database in JSON format,

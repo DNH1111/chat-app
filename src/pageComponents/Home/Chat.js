@@ -3,11 +3,13 @@ import React from 'react';
 import { useParams } from 'react-router';
 import { Loader } from 'rsuite';
 
+import { auth } from '../../misc/firebase';
 import Top from '../../components/Chat-window/top';
 import Messages from '../../components/Chat-window/messages';
 import Bottom from '../../components/Chat-window/bottom';
 import { useRooms } from '../../context/rooms.context';
 import { CurrentRoomProvider } from '../../context/current-room.context';
+import { transformToArr } from '../../misc/helpers';
 
 const Chat = () => {
     // getting chat ID
@@ -33,10 +35,15 @@ const Chat = () => {
 
     const { name, description } = currentRoom;
 
+    const admins = transformToArr(currentRoom.admins);
+    const isAdmin = admins.includes(auth.currentUser.uid);
+
     // const object to be passed to CurrentRoom Context
     const currentRoomData = {
         name,
         description,
+        admins,
+        isAdmin,
     };
 
     if (!currentRoom) {

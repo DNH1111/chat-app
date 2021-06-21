@@ -69,6 +69,7 @@ export const ProfileProvider = ({ children }) => {
                    of the database where the change took place.
                    "snap.val()" returns a JSON value of the contents of the database that were changed.
                 */
+                // console.log(user.uid);
                 userRef = database.ref(`/profiles/${user.uid}`);
 
                 // Create a reference to this user's specific status node.
