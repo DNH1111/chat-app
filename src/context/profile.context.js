@@ -73,7 +73,7 @@ export const ProfileProvider = ({ children }) => {
 
                 // Create a reference to this user's specific status node.
                 // This is where we will store data about being online/offline.
-                userStatusRef = database.ref(`/status/${auth.uid}`);
+                userStatusRef = database.ref(`/status/${user.uid}`);
 
                 userRef.on('value', snap => {
                     const { name, createdAt, avatar } = snap.val();
@@ -95,7 +95,7 @@ export const ProfileProvider = ({ children }) => {
                 // and `false` when disconnected.
                 database.ref('.info/connected').on('value', snapshot => {
                     // If we're not currently connected, don't do anything.
-                    if (snapshot.val() === false) {
+                    if (!!snapshot.val() === false) {
                         return;
                     }
 

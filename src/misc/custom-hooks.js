@@ -1,5 +1,6 @@
 // custom hooks
 import { useEffect, useState, useCallback } from 'react';
+import { database } from './firebase';
 
 // custom-hook to keep track of state of a Drawer (opened, closed)
 export function useModalState(defaultValue = false) {
@@ -29,3 +30,30 @@ export const useMediaQuery = query => {
 
     return matches;
 };
+
+// custom-hook to get realtime presence from users
+export function usePresence(uid) {
+    // state for presence
+    const [presence, setPresence] = useState(null);
+
+    useEffect(() => {
+        const userStatusRef = database.ref(`/status/${uid}`);
+
+        userStatusRef.on('value', snap => {
+            if (snap.exists) {
+                // get data
+                const data = snap.val();
+
+                // update presence state
+                setPresence(data);
+            }
+        });
+
+        // cleanup function to unsubscribe resources
+        return () => {
+            userStatusRef.off();
+        };
+    }, [uid]);
+
+    return presence;
+}
