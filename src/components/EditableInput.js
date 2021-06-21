@@ -10,6 +10,7 @@ const EditableInput = ({
     label = null,
     placeholder = 'Write your value',
     emptyMSg = 'Empty message',
+    wrapperClassName = '',
     ...inputProps
 }) => {
     // state for input
@@ -49,7 +50,7 @@ const EditableInput = ({
     };
 
     return (
-        <div>
+        <div className={wrapperClassName}>
             {label}
             <InputGroup>
                 <Input
