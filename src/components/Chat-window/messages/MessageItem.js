@@ -6,6 +6,7 @@ import { Button } from 'rsuite';
 import ProfileAvatar from '../../Dashboard/ProfileAvatar';
 import ProfileInfoBtnModal from './ProfileInfoBtnModal';
 import PresenceDot from '../../PresenceDot';
+import IconBtnControl from './IconBtnControl';
 import { useCurrentRoom } from '../../../context/current-room.context';
 import { auth } from '../../../misc/firebase';
 import { useHover } from '../../../misc/custom-hooks';
@@ -66,6 +67,15 @@ const MessageItem = ({ message, handleAdmin }) => {
                 <TimeAgo
                     datetime={createdAt}
                     className="font-normal text-black-45 ml-2"
+                />
+
+                <IconBtnControl
+                    {...(true ? { color: 'red' } : {})}
+                    isVisible
+                    iconName="heart"
+                    tooltip="Like this messsage"
+                    onClick={() => {}}
+                    badgeContent={5}
                 />
             </div>
 
