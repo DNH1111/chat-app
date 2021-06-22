@@ -1,7 +1,8 @@
 /* eslint-disable no-console */
 // React Component to display the Chats on the Chat page
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router';
+import { Alert } from 'rsuite';
 import { database } from '../../../misc/firebase';
 import { transformToArrayWithId } from '../../../misc/helpers';
 import MessageItem from './MessageItem';
@@ -38,12 +39,44 @@ const Messages = () => {
         };
     }, [chatId]);
 
+    // function to handle Admin (to be sent as a prop to the MessageItem Component)
+    const handleAdmin = useCallback(
+        async uid => {
+            const adminsref = database.ref(`rooms/${chatId}/admins`);
+            let alertMessage;
+
+            await adminsref.transaction(admins => {
+                if (admins) {
+                    if (admins[uid]) {
+                        // if the user is already an Admin, remove them from Admin
+                        admins[uid] = null;
+                        alertMessage = 'Admin permission revoked';
+                    } else {
+                        // make the user Admin
+                        admins[uid] = true;
+                        alertMessage = 'Admin permission granted';
+                    }
+                }
+                return admins;
+            });
+
+            Alert.info(alertMessage, 4000);
+        },
+        [chatId]
+    );
+
     // console.log(messages);
     return (
         <ul className="msg-list custom-scroll">
             {isChatEmpty && <li>No messages yet</li>}
             {canShowMessages &&
-                messages.map(msg => <MessageItem key={msg.id} message={msg} />)}
+                messages.map(msg => (
+                    <MessageItem
+                        key={msg.id}
+                        message={msg}
+                        handleAdmin={handleAdmin}
+                    />
+                ))}
         </ul>
     );
 };
