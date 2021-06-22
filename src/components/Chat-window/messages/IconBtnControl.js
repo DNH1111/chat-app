@@ -17,7 +17,7 @@ const IconBtnControl = ({
             children
         );
     };
-
+    // console.log(`${badgeContent}`);
     return (
         <div
             className="ml-2"
@@ -36,7 +36,7 @@ const IconBtnControl = ({
                         {...props}
                         onClick={onClick}
                         circle
-                        size="xs"
+                        size="lg"
                         icon={<Icon icon={iconName} />}
                     />
                 </Whisper>

@@ -17,6 +17,7 @@ function assembleMessage(profile, chatId) {
             ...(profile.avatar ? { avatar: profile.avatar } : {}),
         },
         createdAt: firebase.database.ServerValue.TIMESTAMP, // time at which message was sent
+        likeCount: 0,
     };
 }
 
@@ -33,8 +34,8 @@ const Bottom = () => {
     const [isLoading, setIsLoading] = useState(false);
 
     // function to handle message input - executes when the onChange() event of message input is triggered
-    /* REMINDER: onChange() event of rsuite Input Component provides value and event to work with
-                 for a normal input Component, the onChange() would have provided only the event
+    /* REMINDER: onChange() event of rsuite Input Component provides value and event to work with.
+                 For a normal input Component, the onChange() would have provided only the event.
     */
     const onInputChange = useCallback(value => {
         // updating input state

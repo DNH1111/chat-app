@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router';
 import { Alert } from 'rsuite';
-import { database } from '../../../misc/firebase';
+import { auth, database } from '../../../misc/firebase';
 import { transformToArrayWithId } from '../../../misc/helpers';
 import MessageItem from './MessageItem';
 
@@ -65,6 +65,37 @@ const Messages = () => {
         [chatId]
     );
 
+    // function to handle number of likes for a message
+    const handleLikes = useCallback(async msgId => {
+        const messagesRef = database.ref(`messages/${msgId}`);
+        const { uid } = auth.currentUser;
+        let alertMessage;
+
+        await messagesRef.transaction(msg => {
+            if (msg) {
+                if (msg.likes && msg.likes[uid]) {
+                    // if the user has already liked a message, unlike it
+                    msg.likeCount--;
+                    msg.likes[uid] = null;
+                    alertMessage = 'You unliked this message';
+                } else {
+                    // like the message
+                    msg.likeCount++;
+
+                    if (!msg.likes) {
+                        msg.likes = {};
+                    }
+
+                    msg.likes[uid] = true;
+                    alertMessage = 'You liked this message';
+                }
+            }
+            return msg;
+        });
+
+        Alert.info(alertMessage, 4000);
+    }, []);
+
     // console.log(messages);
     return (
         <ul className="msg-list custom-scroll">
@@ -75,6 +106,7 @@ const Messages = () => {
                         key={msg.id}
                         message={msg}
                         handleAdmin={handleAdmin}
+                        handleLikes={handleLikes}
                     />
                 ))}
         </ul>

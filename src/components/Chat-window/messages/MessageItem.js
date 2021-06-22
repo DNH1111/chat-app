@@ -9,11 +9,11 @@ import PresenceDot from '../../PresenceDot';
 import IconBtnControl from './IconBtnControl';
 import { useCurrentRoom } from '../../../context/current-room.context';
 import { auth } from '../../../misc/firebase';
-import { useHover } from '../../../misc/custom-hooks';
+import { useHover, useMediaQuery } from '../../../misc/custom-hooks';
 
-const MessageItem = ({ message, handleAdmin }) => {
+const MessageItem = ({ message, handleAdmin, handleLikes }) => {
     // retrieving message elements
-    const { author, createdAt, text } = message;
+    const { author, createdAt, text, likes, likeCount } = message;
 
     // using the useHover() custom-hook
     /* returns two values:
@@ -22,6 +22,8 @@ const MessageItem = ({ message, handleAdmin }) => {
     */
     const [selfRef, isHovered] = useHover();
 
+    const isMobile = useMediaQuery('(max-width: 992px)');
+
     // getting data from CurrentRoom Context
     const isAdmin = useCurrentRoom(v => v.isAdmin);
     const admins = useCurrentRoom(v => v.admins);
@@ -29,6 +31,11 @@ const MessageItem = ({ message, handleAdmin }) => {
     const isMsgAuthorAdmin = admins.includes(author.uid);
     const isAuthor = auth.currentUser.uid === author.uid;
     const canGrantAdmin = isAdmin && !isAuthor;
+
+    const canShowIcons = isMobile || isHovered;
+
+    // to see if the current user has liked the message or not
+    const isLiked = likes && Object.keys(likes).includes(auth.currentUser.uid);
 
     return (
         <li
@@ -70,12 +77,13 @@ const MessageItem = ({ message, handleAdmin }) => {
                 />
 
                 <IconBtnControl
-                    {...(true ? { color: 'red' } : {})}
-                    isVisible
+                    // eslint-disable-next-line no-constant-condition
+                    {...(isLiked ? { color: 'red' } : {})}
+                    isVisible={canShowIcons}
                     iconName="heart"
                     tooltip="Like this messsage"
-                    onClick={() => {}}
-                    badgeContent={5}
+                    onClick={() => handleLikes(message.id)}
+                    badgeContent={likeCount}
                 />
             </div>
 
