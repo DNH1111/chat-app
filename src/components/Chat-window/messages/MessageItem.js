@@ -8,10 +8,18 @@ import ProfileInfoBtnModal from './ProfileInfoBtnModal';
 import PresenceDot from '../../PresenceDot';
 import { useCurrentRoom } from '../../../context/current-room.context';
 import { auth } from '../../../misc/firebase';
+import { useHover } from '../../../misc/custom-hooks';
 
 const MessageItem = ({ message, handleAdmin }) => {
     // retrieving message elements
     const { author, createdAt, text } = message;
+
+    // using the useHover() custom-hook
+    /* returns two values:
+        1. reference: which will be assigned to an Element.
+        2. isHovered: to tell if the Element is hovered on.
+    */
+    const [selfRef, isHovered] = useHover();
 
     // getting data from CurrentRoom Context
     const isAdmin = useCurrentRoom(v => v.isAdmin);
@@ -22,7 +30,12 @@ const MessageItem = ({ message, handleAdmin }) => {
     const canGrantAdmin = isAdmin && !isAuthor;
 
     return (
-        <li className="padded mb-1">
+        <li
+            className={`padded mb-1 cursor-pointer ${
+                isHovered ? 'bg-black-02' : ''
+            }`}
+            ref={selfRef}
+        >
             <div className="d-flex align-items-center font-bolder mb-1">
                 <PresenceDot uid={author.uid} />
 
