@@ -96,6 +96,47 @@ const Messages = () => {
         Alert.info(alertMessage, 4000);
     }, []);
 
+    // function to delete a message
+    const handleDelete = useCallback(
+        async msgId => {
+            // ask user to confirm delete
+            // eslint-disable-next-line no-alert
+            if (!window.confirm('Delete this message?')) {
+                // if the user closes this, return
+                return;
+            }
+
+            // else, delete the message
+            // message to be deleted can also be the last message sent
+            // use the "messages" to refer to the message state
+            const isLastMessage = messages[messages.length - 1].id === msgId;
+
+            const updates = {};
+            updates[`/messages/${msgId}`] = null;
+
+            if (isLastMessage && messages.length === 1) {
+                updates[`/rooms/${chatId}/lastMessage`] = null;
+            }
+
+            if (isLastMessage && messages.length > 1) {
+                updates[`/rooms/${chatId}/lastMessage`] = {
+                    ...messages[messages.length - 2],
+                    msgId: messages[messages.length - 2].id,
+                };
+            }
+
+            // updating the database
+            try {
+                await database.ref().update(updates);
+
+                Alert.success('Message deleted', 4000);
+            } catch (err) {
+                Alert.error(err.message, 4000);
+            }
+        },
+        [chatId, messages]
+    );
+
     // console.log(messages);
     return (
         <ul className="msg-list custom-scroll">
@@ -107,6 +148,7 @@ const Messages = () => {
                         message={msg}
                         handleAdmin={handleAdmin}
                         handleLikes={handleLikes}
+                        handleDelete={handleDelete}
                     />
                 ))}
         </ul>

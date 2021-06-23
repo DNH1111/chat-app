@@ -11,7 +11,7 @@ import { useCurrentRoom } from '../../../context/current-room.context';
 import { auth } from '../../../misc/firebase';
 import { useHover, useMediaQuery } from '../../../misc/custom-hooks';
 
-const MessageItem = ({ message, handleAdmin, handleLikes }) => {
+const MessageItem = ({ message, handleAdmin, handleLikes, handleDelete }) => {
     // retrieving message elements
     const { author, createdAt, text, likes, likeCount } = message;
 
@@ -85,6 +85,16 @@ const MessageItem = ({ message, handleAdmin, handleLikes }) => {
                     onClick={() => handleLikes(message.id)}
                     badgeContent={likeCount}
                 />
+
+                {isAuthor && (
+                    <IconBtnControl
+                        // eslint-disable-next-line no-constant-condition
+                        isVisible={canShowIcons}
+                        iconName="close"
+                        tooltip="Delete messsage"
+                        onClick={() => handleDelete(message.id)}
+                    />
+                )}
             </div>
 
             <div>
