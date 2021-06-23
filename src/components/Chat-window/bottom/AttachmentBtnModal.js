@@ -60,7 +60,7 @@ const AttachmentBtnModal = ({ afterUpload }) => {
             // each promise inside "uploadPromises" returns a snapshot
             const uploadSnapshots = await Promise.all(uploadPromises);
 
-            const shapePromises = uploadPromises.map(async snap => {
+            const shapePromises = uploadSnapshots.map(async snap => {
                 // for each snapshot of file, return an object containing file info
                 // this in turn would be stored in the realtime database
                 return {

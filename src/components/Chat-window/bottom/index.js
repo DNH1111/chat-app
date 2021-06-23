@@ -92,10 +92,56 @@ const Bottom = () => {
         }
     };
 
+    // function/handler to store uploaded files in the database.
+    // this function is sent as a prop to the AttachmentBtnModal Component.
+    // it receives an Array of Object, with each Object containing info for each uploaded file.
+    const afterUpload = useCallback(
+        async files => {
+            setIsLoading(true);
+            const updates = {};
+
+            files.forEach(file => {
+                // assembling message data
+                const messageData = assembleMessage(profile, chatId);
+                messageData.file = file; // adding a new field call "file" containing file info
+
+                const messageId = database.ref('messages').push().key;
+
+                updates[`/messages/${messageId}`] = messageData;
+            });
+
+            // the last file is to be saved as lastMessage in the "rooms" document in the database.
+            // get the messageId of the last element of the "updates" Object
+            const lastMessageId = Object.keys(updates).pop();
+
+            // saving lastMessage to the "rooms" document in the database
+            updates[`/rooms/${chatId}/lastMessage`] = {
+                ...updates[lastMessageId],
+                msgId: lastMessageId,
+            };
+
+            try {
+                // updating database with update contents
+                /* NOTICE: the keys of the "updates" object are actually paths to different 
+                   documents in the database. Updating the database as shown below
+                   would make all the updates in one ago. This is an "atomic" way.
+                */
+                await database.ref().update(updates);
+
+                // reset states after updating database
+                setIsLoading(false);
+            } catch (err) {
+                setIsLoading(false);
+                Alert.error(err.message, 4000);
+            }
+        },
+        [chatId, profile]
+    );
+
     return (
         <div>
             <InputGroup>
-                <AttachmentBtnModal />
+                <AttachmentBtnModal afterUpload={afterUpload} />
                 <Input
                     placeholder="Type your message here..."
                     value={input}
