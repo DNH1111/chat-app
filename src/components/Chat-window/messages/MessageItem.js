@@ -7,13 +7,30 @@ import ProfileAvatar from '../../Dashboard/ProfileAvatar';
 import ProfileInfoBtnModal from './ProfileInfoBtnModal';
 import PresenceDot from '../../PresenceDot';
 import IconBtnControl from './IconBtnControl';
+import ImgBtnModal from './ImgBtnModal';
 import { useCurrentRoom } from '../../../context/current-room.context';
 import { auth } from '../../../misc/firebase';
 import { useHover, useMediaQuery } from '../../../misc/custom-hooks';
 
+// function to render file in the chat
+const renderFileMessage = file => {
+    // console.log(file.contentType);
+
+    // if file is an image
+    if (file.contentType.includes('image')) {
+        // markup is returned
+        return (
+            <div className="height-220">
+                <ImgBtnModal src={file.url} fileName={file.name} />
+            </div>
+        );
+    }
+    return <a href={file.url}>Download [file.name]</a>;
+};
+
 const MessageItem = ({ message, handleAdmin, handleLikes, handleDelete }) => {
     // retrieving message elements
-    const { author, createdAt, text, likes, likeCount } = message;
+    const { author, createdAt, text, file, likes, likeCount } = message;
 
     // using the useHover() custom-hook
     /* returns two values:
@@ -98,7 +115,8 @@ const MessageItem = ({ message, handleAdmin, handleLikes, handleDelete }) => {
             </div>
 
             <div>
-                <span className="word-break-all">{text}</span>
+                {text && <span className="word-break-all">{text}</span>}
+                {file && renderFileMessage(file)}
             </div>
         </li>
     );
