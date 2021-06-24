@@ -52,7 +52,7 @@ const AttachmentBtnModal = ({ afterUpload }) => {
                 return storage
                     .ref(`chat/${chatId}`)
                     .child(Date.now() + file.name)
-                    .put(file.blobFile.size, {
+                    .put(file.blobFile, {
                         cacheControl: `public, max-age=${3600 * 24 * 3}`,
                     });
             });

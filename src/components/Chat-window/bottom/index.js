@@ -7,6 +7,7 @@ import { useParams } from 'react-router';
 import { useProfile } from '../../../context/profile.context';
 import { database } from '../../../misc/firebase';
 import AttachmentBtnModal from './AttachmentBtnModal';
+import AudioMsgBtn from './AudioMsgBtn';
 
 // function to assemble user's message with details to be saved in the database
 function assembleMessage(profile, chatId) {
@@ -142,6 +143,7 @@ const Bottom = () => {
         <div>
             <InputGroup>
                 <AttachmentBtnModal afterUpload={afterUpload} />
+                <AudioMsgBtn afterUpload={afterUpload} />
                 <Input
                     placeholder="Type your message here..."
                     value={input}
