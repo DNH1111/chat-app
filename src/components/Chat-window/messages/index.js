@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router';
 import { Alert } from 'rsuite';
-import { auth, database } from '../../../misc/firebase';
+import { auth, database, storage } from '../../../misc/firebase';
 import { transformToArrayWithId } from '../../../misc/helpers';
 import MessageItem from './MessageItem';
 
@@ -98,7 +98,7 @@ const Messages = () => {
 
     // function to delete a message
     const handleDelete = useCallback(
-        async msgId => {
+        async (msgId, file) => {
             // ask user to confirm delete
             // eslint-disable-next-line no-alert
             if (!window.confirm('Delete this message?')) {
@@ -131,7 +131,28 @@ const Messages = () => {
 
                 Alert.success('Message deleted', 4000);
             } catch (err) {
-                Alert.error(err.message, 4000);
+                // eslint-disable-next-line consistent-return
+                return Alert.error(err.message, 5000);
+                /* explanation of having "return" in the above line:
+                    - Suppose the message to be deleted is an uploaded file.
+                    - If the deletion of the file from the realtime database 
+                      (happening in this try-catch) fails, to make sure the code below
+                      it doesn't execute, we have the "return" statement.
+                    - In case of failed delete from the database, the code below would still erase
+                      the files from the storage, if we didn't put "return" statement above.
+                */
+            }
+
+            // if the deleted message is an uploaded file,
+            // remove it from the storage (different from the realtime database) as well.
+            if (file) {
+                try {
+                    // creating reference to storage, where uploaded files are stored
+                    const fileRef = storage.refFromURL(file.url);
+                    await fileRef.delete(); // delete file from storage
+                } catch (err) {
+                    Alert.error(err.message, 5000);
+                }
             }
         },
         [chatId, messages]

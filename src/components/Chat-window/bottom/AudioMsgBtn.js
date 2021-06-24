@@ -60,7 +60,6 @@ const AudioMsgBtn = ({ afterUpload }) => {
 
     return (
         <>
-            {' '}
             <InputGroup.Button
                 onClick={onClick}
                 disabled={isUploading}
