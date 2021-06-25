@@ -88,3 +88,34 @@ export async function getUserUpdates(userId, keyToUpdate, value, db) {
 
     return updates;
 }
+
+// function to group items in an array by keys
+/* Takes 2 args:
+    1. array whose elements need to be grouped
+    2. callback function to generate grouping keys, by which the array elements are grouped.
+    A GOOD EXAMPLE OF HOW IT'S USED:
+      - An Array (of Objects) containing message Objects is sent.
+      - the callback function would return the createdAt value from each message Object inside the Array.
+      - the callback function would look like: (msgItem) => { return msgItem.createdAt; }
+      - then the groupBy() function would return an object containing each createdAt as key, whose
+        value would correspond to the message Object.
+      - Something like: 
+            {
+                createdAt_1: [message_1, message_2],
+                createdAT_2: [message_3, message_4],
+                ...
+            }
+*/
+export function groupBy(array, groupingKeyFn) {
+    return array.reduce((result, ele) => {
+        const groupingKey = groupingKeyFn(ele);
+
+        if (!result[groupingKey]) {
+            result[groupingKey] = [];
+        }
+
+        result[groupingKey].push(ele);
+
+        return result;
+    }, {});
+}

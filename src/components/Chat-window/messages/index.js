@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router';
 import { Alert } from 'rsuite';
 import { auth, database, storage } from '../../../misc/firebase';
-import { transformToArrayWithId } from '../../../misc/helpers';
+import { groupBy, transformToArrayWithId } from '../../../misc/helpers';
 import MessageItem from './MessageItem';
 
 const Messages = () => {
@@ -158,20 +158,47 @@ const Messages = () => {
         [chatId, messages]
     );
 
+    const renderMessages = () => {
+        // using user-defined function to group elements in an array
+        // grouping messages by time
+        const groups = groupBy(messages, msgItem =>
+            new Date(msgItem.createdAt).toDateString()
+        );
+        // groups is now an Object with its keys as "date" of messages sent,
+        // and values correspond to the messages sent on that date
+        // console.log(groups);
+
+        const items = [];
+
+        // for each date, show date and messages on that date
+        Object.keys(groups).forEach(date => {
+            items.push(
+                <li key={date} className="text-center mb-1 padded">
+                    {date}
+                </li>
+            );
+
+            // each date key inside the groups Object has messages as its value (date: [msg_1, msg_2])
+            const msgs = groups[date].map(msg => (
+                <MessageItem
+                    key={msg.id}
+                    message={msg}
+                    handleAdmin={handleAdmin}
+                    handleLikes={handleLikes}
+                    handleDelete={handleDelete}
+                />
+            ));
+            items.push(...msgs);
+        });
+
+        return items;
+    };
+
     // console.log(messages);
     return (
         <ul className="msg-list custom-scroll">
             {isChatEmpty && <li>No messages yet</li>}
-            {canShowMessages &&
-                messages.map(msg => (
-                    <MessageItem
-                        key={msg.id}
-                        message={msg}
-                        handleAdmin={handleAdmin}
-                        handleLikes={handleLikes}
-                        handleDelete={handleDelete}
-                    />
-                ))}
+            {canShowMessages && renderMessages()}
         </ul>
     );
 };
