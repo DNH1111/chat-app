@@ -1,11 +1,23 @@
 /* eslint-disable no-console */
 // React Component to display the Chats on the Chat page
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router';
-import { Alert } from 'rsuite';
+import { Alert, Button } from 'rsuite';
 import { auth, database, storage } from '../../../misc/firebase';
 import { groupBy, transformToArrayWithId } from '../../../misc/helpers';
 import MessageItem from './MessageItem';
+
+const PAGE_SIZE = 15;
+const messagesRef = database.ref('/messages');
+
+// function to decide whether to scroll to the bottom if the threshold is hit
+function shouldScrollToBottom(node, threshold = 30) {
+    // calculate % of scroll position
+    const percentage =
+        (100 * node.scrollTop) / (node.scrollHeight - node.clientHeight) || 0;
+
+    return percentage > threshold;
+}
 
 const Messages = () => {
     // get chat ID
@@ -14,30 +26,81 @@ const Messages = () => {
     // state for messages
     const [messages, setMessages] = useState(null);
 
+    // state for page-size
+    const [limit, setLimit] = useState(PAGE_SIZE);
+
+    // reference for Component/Tag
+    const selfRef = useRef(); // used for the <ul> Tag where messages are displayed
+
     const isChatEmpty = messages && messages.length === 0;
     const canShowMessages = messages && messages.length > 0;
 
+    // function to load previous messages
+    const loadMessages = useCallback(
+        limitToLast => {
+            // get current <ul> Component reference
+            const node = selfRef.current;
+
+            // unsubscribe from the previous updates
+            messagesRef.off();
+
+            // listener for messages in current chat room
+            messagesRef
+                .orderByChild('room')
+                .equalTo(chatId)
+                .limitToLast(limitToLast || PAGE_SIZE) // limit child nodes to a certain amount. Each message-item is counted as 1 node.
+                .on('value', snap => {
+                    // using user-defined function to convert contents of snap.val() into suitable form
+                    const data = transformToArrayWithId(snap.val());
+
+                    // updating message state
+                    setMessages(data);
+
+                    if (shouldScrollToBottom(node)) {
+                        node.scrollTop = node.scrollHeight;
+                    }
+                });
+
+            // updating page limit
+            setLimit(p => p + PAGE_SIZE);
+        },
+        [chatId]
+    );
+
+    // function to load older messages
+    const onLoadMore = useCallback(() => {
+        // referencing current <ul> Component
+        const node = selfRef.current;
+        const oldHeight = node.scrollHeight; // getting current height of the scroll bar before loading messages
+
+        loadMessages(limit);
+
+        setTimeout(() => {
+            const newHeight = node.scrollHeight;
+            node.scrollTop = newHeight - oldHeight;
+        }, 200);
+    }, [loadMessages, limit]);
+
     // useEffect() hook for changing message states. So that each message is added to database
     useEffect(() => {
-        const messagesRef = database.ref('/messages');
+        // referencing the current <ul> Component using ite reference
+        const node = selfRef.current;
 
-        // listener for messages in current chat room
-        messagesRef
-            .orderByChild('room')
-            .equalTo(chatId)
-            .on('value', snap => {
-                // using user-defined function to convert contents of snap.val() into suitable form
-                const data = transformToArrayWithId(snap.val());
+        // calling loadMessages() function
+        loadMessages();
 
-                // updating message state
-                setMessages(data);
-            });
+        // scrolling to bottom after reloading page
+        // using setTimeout() so that the function inside it takes place after loadingMessages(), which is asynchronous.
+        // we couldn't use await in this case since callback function inside the useEffect() hook have to be synchronous,
+        setTimeout(() => {
+            node.scrollTop = node.scrollHeight;
+        }, 200);
 
         // cleanup function to unsubscribe resources after use
         return () => {
             messagesRef.off('value');
         };
-    }, [chatId]);
+    }, [loadMessages]);
 
     // function to handle Admin (to be sent as a prop to the MessageItem Component)
     const handleAdmin = useCallback(
@@ -67,11 +130,11 @@ const Messages = () => {
 
     // function to handle number of likes for a message
     const handleLikes = useCallback(async msgId => {
-        const messagesRef = database.ref(`messages/${msgId}`);
+        const messageRef = database.ref(`messages/${msgId}`);
         const { uid } = auth.currentUser;
         let alertMessage;
 
-        await messagesRef.transaction(msg => {
+        await messageRef.transaction(msg => {
             if (msg) {
                 if (msg.likes && msg.likes[uid]) {
                     // if the user has already liked a message, unlike it
@@ -196,7 +259,14 @@ const Messages = () => {
 
     // console.log(messages);
     return (
-        <ul className="msg-list custom-scroll">
+        <ul ref={selfRef} className="msg-list custom-scroll">
+            {messages && messages.length >= PAGE_SIZE && (
+                <li className="text-center mt-2 mb-2">
+                    <Button onClick={onLoadMore} color="green">
+                        Load more
+                    </Button>
+                </li>
+            )}
             {isChatEmpty && <li>No messages yet</li>}
             {canShowMessages && renderMessages()}
         </ul>
