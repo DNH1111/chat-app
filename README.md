@@ -1,7 +1,7 @@
 # chat-app
 - A Web Chat app created as part of the **Internshala Trainings**' ReactJS course.
 - Implemented using **React JS**.
-- Also uses firebase for database and hosting operations.
+- Also uses **Google firebase** for database and hosting operations.
 
 ## Features:
 - Allows to login user using Google or Facebook.
