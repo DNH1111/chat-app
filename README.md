@@ -13,4 +13,4 @@
 ## APIs:
 - **rsuite**: for pre-made, reusable, and styled Components.
 
-### [Check it out now!!](https://chat-web-app-c9264.web.app/) 
+### [Check it out here](https://chat-web-app-c9264.web.app/) 
